@@ -39,7 +39,11 @@
         })
         markers.forEach((marker) => {
           marker.addListener('click', (e) => {
-            location.href = `${location.origin}?id=${marker.id}`
+              if (location.search.substring(0, location.search.indexOf("&button")).length > 0) {
+                location.href = `${location.origin}${location.search.substring(0, location.search.indexOf("&button"))}&id=${marker.id}`
+              } else {
+                location.href = `${location.origin}${location.search.substring(0, location.search.indexOf("&id="))}&id=${marker.id}` 
+              }
           })
         })
       }

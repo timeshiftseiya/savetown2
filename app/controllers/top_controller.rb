@@ -4,6 +4,7 @@ class TopController < ApplicationController
     if params[:id]
       @registered_point = AccidentPoint.find(params[:id])
     end
+    # binding.pry
     if params[:address].present?
       @address = Geocoder.search(params[:address])
       @ap = Search.new(@address[0].data["geometry"]["location"]["lat"], @address[0].data["geometry"]["location"]["lng"])
