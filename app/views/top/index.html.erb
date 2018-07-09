@@ -40,9 +40,12 @@
         markers.forEach((marker) => {
           marker.addListener('click', (e) => {
               if (location.search.substring(0, location.search.indexOf("&button")).length > 0) {
-                location.href = `${location.origin}${location.search.substring(0, location.search.indexOf("&button"))}&id=${marker.id}`
+                return location.href = `${location.origin}${location.search.substring(0, location.search.indexOf("&button"))}&id=${marker.id}`
+                
+              } else if (location.search.length === 0) {
+                return location.href = `${location.origin}/?id=${marker.id}`  
               } else {
-                location.href = `${location.origin}${location.search.substring(0, location.search.indexOf("&id="))}&id=${marker.id}` 
+                location.href = `${location.origin}/${location.search.substring(0, location.search.indexOf("&id="))}?id=${marker.id}` 
               }
           })
         })
