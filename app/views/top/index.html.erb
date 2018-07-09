@@ -39,7 +39,7 @@
         })
         markers.forEach((marker) => {
           marker.addListener('click', (e) => {
-            location.href = `${location.href}?id=${marker.id}`
+            location.href = `${location.origin}?id=${marker.id}`
           })
         })
       }
