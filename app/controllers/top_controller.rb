@@ -11,7 +11,6 @@ class TopController < ApplicationController
       @ap = Search.new
     end
     # できれば緯度経度で絞り込む
-
     # @registered_points = AccidentPoint.all.to_json(include: disaster_pictures)
     # acs.each {|ac| [].push(AccidentPoint.includes(:disaster_pictures).select("disaster_pictures.image"))}
     # AccidentPoint.all.each {|ac| [].push(AccidentPoint.includes(:disaster_pictures).select("disaster_pictures.image"))}
