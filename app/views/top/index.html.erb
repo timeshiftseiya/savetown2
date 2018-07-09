@@ -1,0 +1,156 @@
+<%= form_with url: root_path, method: :get, local: true do |form| %>
+  <%= form.text_field :address %>
+  <%= form.button %>
+<%end%>
+
+<script type="text/javascript">
+    function initMap() {
+      var Marker;
+      var firstPosition = { lat: <%= @ap.latitude %>, lng: <%= @ap.longitude %>};
+      var registerdPoints = <%= raw @registered_points %>;
+      var map = new google.maps.Map(document.getElementById('map'), {
+        zoom: 15,
+        center:firstPosition
+      });
+      setPin(registerdPoints)
+      var transitLayer = new google.maps.TransitLayer();
+      transitLayer.setMap(map);
+
+      var contentString = '住所：<%= @address %>';
+      var infowindow = new google.maps.InfoWindow({
+        content: contentString
+      });
+      var marker = new google.maps.Marker({
+        position: firstPosition,
+        map: map,
+        title: contentString
+      });
+
+      function setPin(dataPoints) {
+        let markers = []
+        dataPoints.forEach((data) => {
+           fetchedMarker = new google.maps.Marker({
+               position: { lat: data.latitude, lng: data.longitude },
+               map: map,
+               title: data.content,
+               id: data.id
+           })
+           markers.push(fetchedMarker)
+        })
+        markers.forEach((marker) => {
+          marker.addListener('click', (e) => {
+            location.href = `${location.href}?id=${marker.id}`
+          })
+        })
+      }
+      // ピンを立てる
+      google.maps.event.addListener(map, 'click',(e) => {
+        if(Marker) {Marker.setMap(null)};
+        Marker = new google.maps.Marker({
+            position: e.latLng,
+            dragger: true,
+            map: map
+        })
+        // 内容を入力
+        Marker.addListener('click', function(e) {
+            // form作成
+            var form = document.createElement('form');
+            form.action = '/accident_points';
+            form.method = 'post';
+            var token = document.createElement('input')
+            token.setAttribute('type', 'hidden')
+            token.name = 'authenticity_token'
+            token.value = document.head.children["csrf-token"].content
+            // fileアップ作成
+            var fileField = document.createElement('input');
+            fileField.setAttribute("type", "file");
+            fileField.name = '[accident_point]image'
+            fileField.value = ""
+            fileField.style.left = '118px';
+            // filechange event
+            fileField.onchange = function(e) {
+                const file = e.currentTarget.files[0];
+                new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(file);
+                    reader.onload = (event) => {
+                     resolve(event.target.result)   
+                    }
+                }).then((result) => {
+                    var convertFileField = document.createElement('input');
+                    convertFileField.value = result;
+                    convertFileField.setAttribute("type", "hidden");
+                    convertFileField.name = '[accident_point]convert_image'
+                    this.form.appendChild(convertFileField)
+                })
+            }
+            // 入力欄作成
+            var textBox = document.createElement('input');
+            textBox.style.width = '200px';
+            textBox.style.height = '140px';
+            textBox.style.marginTop = '30px';
+            textBox.value = '[現場状況][備考]'
+            textBox.name = '[accident_point]content'
+            // 座標入力(緯度)
+            var latitudeBox = document.createElement('input');
+            latitudeBox.value = parseFloat(e.latLng.lat());
+            latitudeBox.name = '[accident_point]latitude'
+            latitudeBox.setAttribute("type", "hidden");
+            // 座標入力(経度)
+            var longitudeBox = document.createElement('input');
+            longitudeBox.value = parseFloat(e.latLng.lng());
+            longitudeBox.name = '[accident_point]longitude'
+            longitudeBox.setAttribute("type", "hidden");
+            // ボタン作成
+            var button = document.createElement('button');
+            button.setAttribute("type", 'submit')
+            form.appendChild(token)
+            form.appendChild(textBox)
+            form.appendChild(latitudeBox)
+            form.appendChild(longitudeBox)
+            form.appendChild(fileField)
+            form.appendChild(button)
+            map.controls[google.maps.ControlPosition.LEFT_CENTER].push(form);
+          });
+        Marker.getPosition().lng(),map.getZoom()
+    });
+  }
+</script>
+<script async defer src="https://maps.googleapis.com/maps/api/js?v=3.exp&key=AIzaSyBCSoBB3SC_dbrf77OE6UkvzquJE23kGpE&callback=initMap">
+
+</script>
+
+<p id="notice"><%= notice %></p>
+
+<% if @registered_point %>
+  <strong>選択した場所</strong>
+  <p><%= @registered_point&.content %></p>
+  <% if @registered_point.disaster_pictures.present? %>
+    <% @registered_point.disaster_pictures.each do |picture| %>
+      <%= image_tag image_url(picture.image)  %>
+    <% end %>
+  <% else %>
+    <p>画像はありません</p>
+  <% end %>
+<% end %>
+
+<p>
+  <strong>Latitude:</strong>
+  <%= @ap.latitude %>
+</p>
+
+<p>
+  <strong>Longitude:</strong>
+  <%= @ap.longitude %>
+</p>
+
+
+
+<style type="text/css">
+  #map { height: 400px;
+    margin-left:auto;
+    margin-right:auto;
+    text-align:left;
+    width: 80%;}
+</style>
+<div id="map"></div>
