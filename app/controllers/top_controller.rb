@@ -3,9 +3,8 @@ class TopController < ApplicationController
   def index
     if params[:id]
       @registered_point = AccidentPoint.find(params[:id])
-    end
-    # binding.pry
-    if params[:address].present?
+      @ap = Search.new(@registered_point.latitude, @registered_point.longitude)
+    elsif params[:address].present?
       @address = Geocoder.search(params[:address])
       @ap = Search.new(@address[0].data["geometry"]["location"]["lat"], @address[0].data["geometry"]["location"]["lng"])
     else
